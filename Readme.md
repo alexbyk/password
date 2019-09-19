@@ -6,6 +6,7 @@ Right now the best available option is [argon2id](https://github.com/P-H-C/phc-w
 ) and recommended defaults
 
 Also some validations are performed by default. Password contain not less than 4 unique and 8 total characters, should contain at least one `number` and one `UpperCase` letter. It's possible to user custom validator by using `WithValidator`
+or skip validation with `HashSkipValidation`
 ## Usage
 
 ```go
@@ -14,6 +15,10 @@ hashed, err := password.Hash("VeryS3cred")
 if err != nil {
   panic(err)
 }
+
+
+// to skip a weakness validation
+hashed, err := password.HashSkipValidation("weak")
 
 // than fetch a hashed password and compare with provided by a user
 if err := password.Verify(hashed, "VeryS3cred"); err != nil {

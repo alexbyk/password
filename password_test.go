@@ -103,13 +103,20 @@ func TestCompareVerify_errors(t *testing.T) {
 func TestHash_weekness(t *testing.T) {
 	ft := ftest.New(t)
 	for _, p := range []string{"a", "aaaaaaaa", "aabbccdd", "aabbccdD"} {
-		_, err := password.HashStrong(p)
+		_, err := password.Hash(p)
 		ft.Eqf(err, password.ErrWeekPassword, "%q should be week", p)
 	}
 
 	_, err := password.Hash("verYs3cr")
 	ft.Nil(err)
 }
+
+func TestHash_withoutValidation(t *testing.T) {
+	ft := ftest.New(t)
+  _, err := password.HashSkipValidation("foo")
+  ft.Nil(err)
+}
+
 
 func TestHash_malformed(t *testing.T) {
 	ft := ftest.New(t)

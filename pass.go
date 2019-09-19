@@ -72,8 +72,8 @@ func IsStrong(plain string) error {
 	return nil
 }
 
-var defaultPass = &Password{validator: nil}
 var strongPass = &Password{validator: IsStrong}
+var anyPass = &Password{}
 
 /*Hash returns a hash that can be used for Verify.
 Salt is generated automatically, the returning result will be in crypt(3) format
@@ -82,16 +82,18 @@ Hashing alrorythm is argon2id right now.
 To implement other checker, use WithChecker()
 
 Also password shouln't contain unicode space character and shoudn't be empty
-*/
-func Hash(plainPassword string) (string, error) { return defaultPass.Hash(plainPassword) }
 
-/*HashStrong does generates a hash but also performs weakness validation. The password should pass default checker:
->= 8 characters && >= 4 total characters and contain number and uppercase letter
+The password should pass default checker:
+>= 8 characters && >= 4 total characters and contain number and uppercase letter. To avoid weakness validation, use HashNoValidation
 */
-func HashStrong(plainPassword string) (string, error) { return strongPass.Hash(plainPassword) }
+func Hash(plainPassword string) (string, error) { return strongPass.Hash(plainPassword) }
+
+/*HashSkipValidation does generates a hash but skips weakness validation. But still, password shouldn't contain spaces and be empty
+*/
+func HashSkipValidation(plainPassword string) (string, error) { return anyPass.Hash(plainPassword) }
 
 // Verify compairs result of Hash with a password and returns nil if hash was generated from provided password
-func Verify(hashed, plain string) error { return defaultPass.Verify(hashed, plain) }
+func Verify(hashed, plain string) error { return strongPass.Verify(hashed, plain) }
 
 // WithValidator returns a password object with custom checker
 func WithValidator(fn func(string) error) *Password {
