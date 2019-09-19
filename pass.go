@@ -30,8 +30,11 @@ func (p *Password) Hash(plain string) (string, error) {
 	if err := checkMalformed(plain); err != nil {
 		return "", err
 	}
-	if err := p.validator(plain); err != nil {
-		return "", err
+
+	if p.validator != nil {
+		if err := p.validator(plain); err != nil {
+			return "", err
+		}
 	}
 	hashed, err := hashArgon2id(plain)
 	return hashed, err
@@ -48,7 +51,8 @@ func (p *Password) Verify(hashed, password string) error {
 	return verifyArgon2id(hashed, password)
 }
 
-func isStrong(plain string) error {
+/*IsStrong checks if the password is strong enough */
+func IsStrong(plain string) error {
 	chars := map[rune]bool{}
 	var upper, number bool
 	for _, r := range plain {
@@ -68,18 +72,23 @@ func isStrong(plain string) error {
 	return nil
 }
 
-var defaultPass = &Password{validator: isStrong}
+var defaultPass = &Password{validator: nil}
+var strongPass = &Password{validator: IsStrong}
 
 /*Hash returns a hash that can be used for Verify.
 Salt is generated automatically, the returning result will be in crypt(3) format
-Hashing alrorythm is argon2id right now. The password should pass default checker:
->= 8 characters && >= 4 total characters and contain number and uppercase letter
+Hashing alrorythm is argon2id right now.
 
 To implement other checker, use WithChecker()
 
 Also password shouln't contain unicode space character and shoudn't be empty
 */
 func Hash(plainPassword string) (string, error) { return defaultPass.Hash(plainPassword) }
+
+/*HashStrong does generates a hash but also performs weakness validation. The password should pass default checker:
+>= 8 characters && >= 4 total characters and contain number and uppercase letter
+*/
+func HashStrong(plainPassword string) (string, error) { return strongPass.Hash(plainPassword) }
 
 // Verify compairs result of Hash with a password and returns nil if hash was generated from provided password
 func Verify(hashed, plain string) error { return defaultPass.Verify(hashed, plain) }

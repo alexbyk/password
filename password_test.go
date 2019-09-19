@@ -103,7 +103,7 @@ func TestCompareVerify_errors(t *testing.T) {
 func TestHash_weekness(t *testing.T) {
 	ft := ftest.New(t)
 	for _, p := range []string{"a", "aaaaaaaa", "aabbccdd", "aabbccdD"} {
-		_, err := password.Hash(p)
+		_, err := password.HashStrong(p)
 		ft.Eqf(err, password.ErrWeekPassword, "%q should be week", p)
 	}
 
